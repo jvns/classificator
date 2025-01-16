@@ -81,6 +81,10 @@ const app = Vue.createApp({
             this.debouncedSave(comment)
         },
 
+        hideSuggestions() {
+            this.comments.forEach(c => c.showSuggestions = false)
+        },
+
         hideSuggestionsDelayed() {
             setTimeout(() => {
                 this.comments.forEach(c => c.showSuggestions = false)
@@ -91,7 +95,7 @@ const app = Vue.createApp({
             comment.category = category
             comment.showSuggestions = false
             this.debouncedSave(comment)
-        }
+        },
     },
 
     mounted() {

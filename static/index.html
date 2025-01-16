@@ -25,7 +25,7 @@
             max-height: 150px;
             overflow-y: auto;
             z-index: 100;
-            width: 150px;
+            width: 300px;
         }
         .suggestion {
             padding: 2px 4px;
@@ -112,6 +112,7 @@
                           v-model="comment.category"
                           @input="showSuggestions(comment)"
                           @blur="hideSuggestionsDelayed"
+                          @keydown.esc="hideSuggestions"
                           @focus="showSuggestions(comment)"
                       >
                       <!-- <button @click="splitComment(comment)">Split</button>-->
