@@ -26,7 +26,7 @@ func (s *Server) getComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := s.db.Query("SELECT rowid, comment, category FROM comments ORDER BY category DESC")
+	rows, err := s.db.Query("SELECT rowid, comment, category FROM comments  WHERE comment != '' ORDER BY lower(category) DESC, lower(comment) ASC")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -2,11 +2,19 @@ const app = Vue.createApp({
     data() {
         return {
             comments: [],
-            saveTimeout: null
+            saveTimeout: null,
+            filterText: ""
         }
     },
 
     computed: {
+        filteredComments() {
+            if (!this.filterText) return this.comments
+            const filter = this.filterText.toLowerCase()
+            return this.comments.filter(comment =>
+                comment.comment.toLowerCase().includes(filter.toLowerCase())
+            )
+        },
         categoryStats() {
             const stats = {}
             this.comments.forEach(comment => {
@@ -62,7 +70,7 @@ const app = Vue.createApp({
 
         getFilteredCategories(comment) {
             const categories = new Set(this.comments.map(c => c.category))
-            return [...categories].filter(cat => 
+            return [...categories].filter(cat =>
                 cat.toLowerCase().includes(comment.category.toLowerCase()) &&
                 cat !== comment.category
             )

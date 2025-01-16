@@ -6,7 +6,7 @@
     <style>
         .grid {
             display: grid;
-            grid-template-columns: minmax(200px, 1fr) 150px;
+            grid-template-columns: minmax(200px, 1fr) 400px;
             gap: 4px;
             margin-bottom: 8px;
         }
@@ -85,8 +85,16 @@
             </div>
         </div>
      -->
+        <div style="position: sticky; top: 0; background: white; padding: 8px; border-bottom: 1px solid #ddd; margin-bottom: 8px; z-index: 100;">
+            <input 
+                type="text" 
+                v-model="filterText" 
+                placeholder="Filter comments..."
+                style="width: 300px; padding: 4px; border: 1px solid #ddd;"
+            >
+        </div>
 
-        <div v-for="comment in comments" :key="comment.id">
+        <div v-for="comment in filteredComments" :key="comment.id">
             <div class="grid" :class="{ edited: comment.edited }">
                 <textarea 
                     v-model="comment.comment" 
