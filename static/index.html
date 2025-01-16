@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Comment Editor</title>
+    <script src="https://unpkg.com/@trevoreyre/autocomplete-vue"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
     <style>
         .grid {
@@ -39,6 +40,10 @@
         }
         .category-wrapper {
             position: relative;
+        }
+        .category-wrapper input {
+          display: block;
+          height: 100%;
         }
         .stats {
             position: fixed;
