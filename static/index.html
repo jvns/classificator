@@ -54,6 +54,8 @@
             padding: 8px;
             font-size: 12px;
             max-width: 200px;
+            height: 100vh;
+            overflow-y: scroll;
         }
         .stats h3 {
             margin: 0 0 4px 0;
@@ -82,14 +84,12 @@
 </head>
 <body>
     <div id="app">
-     <!-- 
         <div class="stats">
             <h3>Categories</h3>
             <div v-for="stat in categoryStats" :key="stat.category">
                 {{ stat.category }}: {{ stat.count }}
             </div>
         </div>
-     -->
         <div style="position: sticky; top: 0; background: white; padding: 8px; border-bottom: 1px solid #ddd; margin-bottom: 8px; z-index: 100;">
             <input 
                 type="text" 
@@ -99,33 +99,35 @@
             >
         </div>
 
-        <div v-for="comment in filteredComments" :key="comment.id">
-            <div class="grid" :class="{ edited: comment.edited }">
-                <textarea 
-                    v-model="comment.comment" 
-                    @input="debouncedSave(comment)"
-                ></textarea>
-                <div class="category-wrapper">
-                    <input 
-                        type="text" 
-                        v-model="comment.category"
-                        @input="showSuggestions(comment)"
-                        @blur="hideSuggestionsDelayed"
-                        @focus="showSuggestions(comment)"
-                    >
-                    <!-- <button @click="splitComment(comment)">Split</button>-->
-                    <div v-if="comment.showSuggestions && getFilteredCategories(comment).length" class="suggestions">
-                        <div 
-                            v-for="cat in getFilteredCategories(comment)" 
-                            :key="cat"
-                            class="suggestion"
-                            @mousedown.prevent="selectCategory(comment, cat)"
-                        >
-                            {{ cat }}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div style="width: calc(100vw - 250px)">
+          <div v-for="comment in filteredComments" :key="comment.id">
+              <div class="grid" :class="{ edited: comment.edited }">
+                  <textarea 
+                      v-model="comment.comment" 
+                      @input="debouncedSave(comment)"
+                  ></textarea>
+                  <div class="category-wrapper">
+                      <input 
+                          type="text" 
+                          v-model="comment.category"
+                          @input="showSuggestions(comment)"
+                          @blur="hideSuggestionsDelayed"
+                          @focus="showSuggestions(comment)"
+                      >
+                      <!-- <button @click="splitComment(comment)">Split</button>-->
+                      <div v-if="comment.showSuggestions && getFilteredCategories(comment).length" class="suggestions">
+                          <div 
+                              v-for="cat in getFilteredCategories(comment)" 
+                              :key="cat"
+                              class="suggestion"
+                              @mousedown.prevent="selectCategory(comment, cat)"
+                          >
+                              {{ cat }}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
         </div>
     </div>
     <script src="script.js"></script>
