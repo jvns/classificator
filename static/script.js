@@ -4,18 +4,22 @@ const app = Vue.createApp({
             comments: [],
             saveTimeout: null,
             heightAdjustTimeout: null,
-            filterText: ""
+            filterText: "",
+            categoryFilter: "",
         }
     },
 
 
     computed: {
         filteredComments() {
-            if (!this.filterText) return this.comments
-            const filter = this.filterText.toLowerCase()
-            return this.comments.filter(comment =>
-                comment.comment.toLowerCase().includes(filter.toLowerCase())
-            )
+            if (!this.filterText && !this.categoryFilter) return this.comments
+            return this.comments.filter(comment => {
+                const matchesText = !this.filterText ||
+                    comment.comment.toLowerCase().includes(this.filterText.toLowerCase())
+                const matchesCategory = !this.categoryFilter ||
+                    comment.category.toLowerCase().includes(this.categoryFilter.toLowerCase())
+                return matchesText && matchesCategory
+            })
         },
         categoryStats() {
             const stats = {}

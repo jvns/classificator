@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Comment Editor</title>
-    <script src="https://unpkg.com/@trevoreyre/autocomplete-vue"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
     <style>
         .grid {
@@ -10,6 +9,7 @@
             grid-template-columns: minmax(200px, 1fr) 400px;
             gap: 4px;
             margin-bottom: 8px;
+            width: calc(100vw - 250px);
         }
         .grid > * {
             min-height: 12px;
@@ -85,56 +85,68 @@
 </head>
 <body>
     <div id="app">
-        <div class="stats">
-            <h3>Categories</h3>
-            <div v-for="stat in categoryStats" :key="stat.category">
-                {{ stat.category }}: {{ stat.count }}
-            </div>
+      <div class="stats">
+        <h3>Categories</h3>
+        <div 
+             v-for="stat in categoryStats" 
+             :key="stat.category"
+             @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
+             style="cursor: pointer"
+             :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
+             >
+             {{ stat.category }} ({{ stat.count }})
         </div>
-        <div style="position: sticky; top: 0; background: white; padding: 8px; border-bottom: 1px solid #ddd; margin-bottom: 8px; z-index: 100;">
+      </div>
+          <div class="grid" style="position: sticky; top: 0; background: white; padding: 8px; border-bottom: 1px solid #ddd; margin-bottom: 8px; z-index: 100;">
             <input 
-                type="text" 
-                v-model="filterText" 
-                placeholder="Filter comments..."
-                style="width: 300px; padding: 4px; border: 1px solid #ddd;"
-            >
-        </div>
+               type="text" 
+               v-model="filterText" 
+               placeholder="Filter comments..."
+               style="width: 300px; padding: 4px; border: 1px solid #ddd;"
+               >
+               <input 
+               type="text" 
+               v-model="categoryFilter" 
+               placeholder="Filter categories..."
+               style="width: 300px; padding: 4px; border: 1px solid #ddd; margin-left: 8px;"
+               >
+          </div>
 
-        <div style="width: calc(100vw - 250px)">
-          <div v-for="comment in filteredComments" :key="comment.id">
-              <div class="grid" :class="{ edited: comment.edited }">
-                  <textarea 
-                      rows="1"
-                      style="resize: none;"
-                      v-model="comment.comment" 
-                      @input="e => { debouncedSave(comment); adjustTextareaHeight(e); }"
-                      @focus="adjustTextareaHeight"
-                  ></textarea>
-                  <div class="category-wrapper">
-                      <input 
+               <div>
+                 <div v-for="comment in filteredComments" :key="comment.id">
+                   <div class="grid" :class="{ edited: comment.edited }">
+                     <textarea 
+                        rows="1"
+                        style="resize: none;"
+                        v-model="comment.comment" 
+                        @input="e => { debouncedSave(comment); adjustTextareaHeight(e); }"
+                        @focus="adjustTextareaHeight"
+                        ></textarea>
+                     <div class="category-wrapper">
+                       <input 
                           type="text" 
                           v-model="comment.category"
                           @input="showSuggestions(comment)"
                           @blur="hideSuggestionsDelayed"
                           @keydown.esc="hideSuggestions"
                           @focus="showSuggestions(comment)"
-                      >
-                      <!-- <button @click="splitComment(comment)">Split</button>-->
-                      <div v-if="comment.showSuggestions && getFilteredCategories(comment).length" class="suggestions">
-                          <div 
-                              v-for="cat in getFilteredCategories(comment)" 
-                              :key="cat"
-                              class="suggestion"
-                              @mousedown.prevent="selectCategory(comment, cat)"
                           >
-                              {{ cat }}
+                          <!-- <button @click="splitComment(comment)">Split</button>-->
+                          <div v-if="comment.showSuggestions && getFilteredCategories(comment).length" class="suggestions">
+                            <div 
+                                                                                                       v-for="cat in getFilteredCategories(comment)" 
+                                                                                                       :key="cat"
+                                                                                                       class="suggestion"
+                                                                                                       @mousedown.prevent="selectCategory(comment, cat)"
+                                                                                                       >
+                                                                                                       {{ cat }}
+                            </div>
                           </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-        </div>
-    </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+      </div>
     <script src="script.js"></script>
 </body>
 </html>
