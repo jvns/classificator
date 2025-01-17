@@ -12,7 +12,7 @@
             margin-bottom: 8px;
         }
         .grid > * {
-            min-height: 24px;
+            min-height: 12px;
             padding: 2px 4px;
             font-size: 14px;
             border: 1px solid #ddd;
@@ -48,7 +48,7 @@
         .stats {
             position: fixed;
             right: 10px;
-            top: 10px;
+            top: 80px;
             background: white;
             border: 1px solid #ddd;
             padding: 8px;
@@ -63,8 +63,9 @@
         }
         textarea {
             resize: vertical;
-            min-height: 24px;
+            min-height: 12px;
             font-family: inherit;
+            height: auto;
             font-size: inherit;
         }
         input {
@@ -103,8 +104,11 @@
           <div v-for="comment in filteredComments" :key="comment.id">
               <div class="grid" :class="{ edited: comment.edited }">
                   <textarea 
+                      rows="1"
+                      style="resize: none;"
                       v-model="comment.comment" 
-                      @input="debouncedSave(comment)"
+                      @input="e => { debouncedSave(comment); adjustTextareaHeight(e); }"
+                      @focus="adjustTextareaHeight"
                   ></textarea>
                   <div class="category-wrapper">
                       <input 

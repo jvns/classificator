@@ -3,9 +3,11 @@ const app = Vue.createApp({
         return {
             comments: [],
             saveTimeout: null,
+            heightAdjustTimeout: null,
             filterText: ""
         }
     },
+
 
     computed: {
         filteredComments() {
@@ -96,11 +98,37 @@ const app = Vue.createApp({
             comment.showSuggestions = false
             this.debouncedSave(comment)
         },
+        adjustTextareaHeight(event) {
+            const textarea = event.target;
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        },
+
+        adjustAllTextareas() {
+            this.$nextTick(() => {
+                document.querySelectorAll('textarea').forEach(textarea => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                });
+            });
+        },
+        debouncedAdjustHeight() {
+            clearTimeout(this.heightAdjustTimeout)
+            this.heightAdjustTimeout = setTimeout(() => this.adjustAllTextareas(), 100)
+        },
+    },
+    watch: {
+        filteredComments() {
+            this.debouncedAdjustHeight()
+        }
+    },
+    async mounted() {
+        await this.fetchComments()
+        this.adjustAllTextareas()
+        const ro = new ResizeObserver(() => this.debouncedAdjustHeight());
+        ro.observe(document.querySelector('#app'));
     },
 
-    mounted() {
-        this.fetchComments()
-    }
 })
 
 app.mount('#app')
