@@ -6,6 +6,7 @@ const app = Vue.createApp({
             heightAdjustTimeout: null,
             filterText: "",
             categoryFilter: "",
+            sortKey: 'category',
         }
     },
 
@@ -26,9 +27,14 @@ const app = Vue.createApp({
             this.comments.forEach(comment => {
                 stats[comment.category] = (stats[comment.category] || 0) + 1
             })
-            return Object.entries(stats)
+            const statsPairs = Object.entries(stats)
                 .map(([category, count]) => ({ category, count }))
-                .sort((a, b) => a.category.localeCompare(b.category))
+            if (this.sortKey === 'count') {
+                return statsPairs.sort((a, b) => b.count - a.count)
+            } else {
+                return statsPairs.sort((a, b) => a.category.localeCompare(b.category))
+            }
+
         }
     },
 
@@ -97,40 +103,21 @@ const app = Vue.createApp({
             }, 200)
         },
 
+        adjustTextareaHeight() {
+            const textarea = this.$refs.textareaRef[0];
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            textarea.focus();
+        },
+
         selectCategory(comment, category) {
             comment.category = category
             comment.showSuggestions = false
             this.debouncedSave(comment)
         },
-        adjustTextareaHeight(event) {
-            const textarea = event.target;
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        },
-
-        adjustAllTextareas() {
-            this.$nextTick(() => {
-                document.querySelectorAll('textarea').forEach(textarea => {
-                    textarea.style.height = 'auto';
-                    textarea.style.height = textarea.scrollHeight + 'px';
-                });
-            });
-        },
-        debouncedAdjustHeight() {
-            clearTimeout(this.heightAdjustTimeout)
-            this.heightAdjustTimeout = setTimeout(() => this.adjustAllTextareas(), 100)
-        },
-    },
-    watch: {
-        filteredComments() {
-            this.debouncedAdjustHeight()
-        }
     },
     async mounted() {
         await this.fetchComments()
-        this.adjustAllTextareas()
-        const ro = new ResizeObserver(() => this.debouncedAdjustHeight());
-        ro.observe(document.querySelector('#app'));
     },
 
 })
