@@ -4,6 +4,13 @@
     <title>Comment Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        * {
+            box-sizing: border-box;
+        }
         .grid {
             display: grid;
             grid-template-columns: minmax(200px, 1fr) 400px;
@@ -53,29 +60,34 @@
             margin-left: 4px;
             vertical-align: middle;
         }
+        #wrapper {
+          padding: 5px;
+          display: grid;
+          grid-template-columns: 1fr 200px;
+          /* areas */
+          grid-template-areas: 
+            "filters filters"
+            "comments stats";
+          gap: 4px;
+          height: 100vh;
+        }
         #filters {
-          position: sticky;
-          top: 0;
-          background: white;
-          padding: 8px;
-          margin-bottom: 8px;
-          z-index: 100;
+          grid-area: filters;
+          padding: 4px;
+          width: 100%;
+          /* some kind of drop shadow, just on the bottom */
+          box-shadow: 0 4px 2px -2px #eee;
         }
         #comments {
-          height: calc(100vh - 80px);
+          grid-area: comments;
           overflow-y: scroll;
-          width: calc(100vw - 250px);
         }
         #stats {
-            position: fixed;
-            right: 10px;
-            top: 60px;
+            grid-area: stats;
             background: white;
-            border: 1px solid #ddd;
+            border-left: 1px solid #ddd;
             padding: 8px;
             font-size: 12px;
-            max-width: 200px;
-            height: 100vh;
             overflow-y: scroll;
         }
         h3 {
@@ -84,80 +96,82 @@
     </style>
 </head>
 <body>
-    <div id="app">
-      <datalist id="categories">
-        <option v-for="category in getCategories()" :value="category"></option>
-      </datalist>
+  <div id="app">
+    <datalist id="categories">
+      <option v-for="category in getCategories()" :value="category"></option>
+    </datalist>
+    <div id="wrapper">
+      <div id="filters">
+        <div class="grid">
+          <input 
+             type="text" 
+             v-model="filterText" 
+             placeholder="Filter comments..."
+             style="width: 300px; padding: 4px; border: 1px solid #ddd;"
+             >
+             <input 
+             type="text" 
+             v-model="categoryFilter" 
+             placeholder="Filter categories..."
+             list="categories"
+             style="width: 300px; padding: 4px; border: 1px solid #ddd; margin-left: 8px;"
+             >
+        </div>
+      </div>
+
+      <div id="comments">
+        <div v-for="comment in filteredComments" :key="comment.id">
+          <div class="grid" :class="{ edited: comment.edited }">
+            <!-- run adjustTextareaHeight on when the textarea is created -->
+            <textarea 
+               v-if="comment.editing" 
+               v-model="comment.comment"
+               ref="textareaRef"
+               @input="adjustTextareaHeight()"
+               @blur="e => {saveComment(comment); comment.editing = false; }"
+               ></textarea>
+            <div
+                v-else
+                @click="() => { 
+                        comment.editing = true;
+                        this.$nextTick(() => adjustTextareaHeight());
+                        }"
+                v-html="comment.comment.replace(/\n/g, '<br>')"
+                ></div>
+
+            <div class="category-wrapper">
+              <input type="text" 
+                     v-model="comment.category"
+                     @blur="saveComment(comment)"
+                     list="categories"
+                     >
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="stats">
         <h3>Categories</h3>
-          (sort by: <span 
+        (sort by: <span 
            :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
            style="cursor: pointer"
-            @click="sortKey='category'">category</span> |
-          <span @click="sortKey='count'"
-            :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
+           @click="sortKey='category'">category</span> |
+         <span @click="sortKey='count'"
+           :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
            style="cursor: pointer">count</span>)
 
-        <div 
-             v-for="stat in categoryStats" 
-             :key="stat.category"
-             @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
-             style="cursor: pointer"
-             :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
-             >
-             {{ stat.category }} ({{ stat.count }})
-        </div>
-
-
-
+         <div 
+           v-for="stat in categoryStats" 
+           :key="stat.category"
+           @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
+           style="cursor: pointer"
+           :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
+           >
+           {{ stat.category }} ({{ stat.count }})
+         </div>
       </div>
-          <div id="filters" class="grid">
-            <input 
-               type="text" 
-               v-model="filterText" 
-               placeholder="Filter comments..."
-               style="width: 300px; padding: 4px; border: 1px solid #ddd;"
-               >
-               <input 
-               type="text" 
-               v-model="categoryFilter" 
-               placeholder="Filter categories..."
-               list="categories"
-               style="width: 300px; padding: 4px; border: 1px solid #ddd; margin-left: 8px;"
-               >
-          </div>
-
-               <div id="comments">
-                 <div v-for="comment in filteredComments" :key="comment.id">
-                   <div class="grid" :class="{ edited: comment.edited }">
-                     <!-- run adjustTextareaHeight on when the textarea is created -->
-                     <textarea 
-                        v-if="comment.editing" 
-                        v-model="comment.comment"
-                        ref="textareaRef"
-                        @input="adjustTextareaHeight()"
-                        @blur="e => {saveComment(comment); comment.editing = false; }"
-                        ></textarea>
-                     <div
-                        v-else
-                        @click="() => { 
-                                 comment.editing = true;
-                                 this.$nextTick(() => adjustTextareaHeight());
-                                 }"
-                        v-html="comment.comment.replace(/\n/g, '<br>')"
-                        ></div>
-            
-                     <div class="category-wrapper">
-                       <input type="text" 
-                              v-model="comment.category"
-                              @blur="saveComment(comment)"
-                              list="categories"
-                       >
-                     </div>
-                   </div>
-                 </div>
-               </div>
-      </div>
+    </div>
+  </div>
     <script src="script.js"></script>
 </body>
 </html>
