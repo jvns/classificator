@@ -85,6 +85,9 @@
 </head>
 <body>
     <div id="app">
+      <datalist id="categories">
+        <option v-for="category in getCategories()" :value="category"></option>
+      </datalist>
       <div class="stats">
         <h3>Categories</h3>
           (sort by: <span 
@@ -144,25 +147,11 @@
                         ></div>
             
                      <div class="category-wrapper">
-                       <input 
-                          type="text" 
-                          v-model="comment.category"
-                          @input="showSuggestions(comment)"
-                          @blur="hideSuggestionsDelayed"
-                          @keydown.esc="hideSuggestions"
-                          @focus="showSuggestions(comment)"
-                          >
-                          <!-- <button @click="splitComment(comment)">Split</button>-->
-                          <div v-if="comment.showSuggestions && getFilteredCategories(comment).length" class="suggestions">
-                            <div 
-                                                                                                       v-for="cat in getFilteredCategories(comment)" 
-                                                                                                       :key="cat"
-                                                                                                       class="suggestion"
-                                                                                                       @mousedown.prevent="selectCategory(comment, cat)"
-                                                                                                       >
-                                                                                                       {{ cat }}
-                            </div>
-                          </div>
+                       <input type="text" 
+                              v-model="comment.category"
+                              @blur="debouncedSave(comment)"
+                              list="categories"
+                       >
                      </div>
                    </div>
                  </div>

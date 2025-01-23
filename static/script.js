@@ -67,40 +67,9 @@ const app = Vue.createApp({
             }
         },
 
-        async splitComment(comment) {
-            try {
-                await fetch(`/api/split/${comment.id}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(comment)
-                })
-                await this.fetchComments()
-            } catch (err) {
-                console.error('Error splitting:', err)
-            }
-        },
-
-        getFilteredCategories(comment) {
+        getCategories() {
             const categories = new Set(this.comments.map(c => c.category))
-            return [...categories].filter(cat =>
-                cat.toLowerCase().includes(comment.category.toLowerCase()) &&
-                cat !== comment.category
-            )
-        },
-
-        showSuggestions(comment) {
-            comment.showSuggestions = true
-            this.debouncedSave(comment)
-        },
-
-        hideSuggestions() {
-            this.comments.forEach(c => c.showSuggestions = false)
-        },
-
-        hideSuggestionsDelayed() {
-            setTimeout(() => {
-                this.comments.forEach(c => c.showSuggestions = false)
-            }, 200)
+            return [...categories].sort()
         },
 
         adjustTextareaHeight() {
@@ -108,12 +77,6 @@ const app = Vue.createApp({
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
             textarea.focus();
-        },
-
-        selectCategory(comment, category) {
-            comment.category = category
-            comment.showSuggestions = false
-            this.debouncedSave(comment)
         },
     },
     async mounted() {
