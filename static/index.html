@@ -15,15 +15,22 @@
             display: grid;
             grid-template-columns: minmax(200px, 1fr) 400px;
             gap: 4px;
-            margin-bottom: 8px;
             width: calc(100vw - 250px);
         }
-        .grid > * {
+        .grid > *, .grid2 > * {
             min-height: 12px;
             padding: 2px 4px;
             font-size: 14px;
             border: 1px solid #ddd;
             margin: 0;
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) 400px;
+            gap: 4px;
+            margin-bottom: 8px;
+            width: 100%;
         }
         .edited {
             background-color: #fafafa;
@@ -61,7 +68,7 @@
             vertical-align: middle;
         }
         #wrapper {
-          padding: 5px;
+          padding: 0;
           display: grid;
           grid-template-columns: 1fr 200px;
           /* areas */
@@ -73,12 +80,12 @@
         }
         #filters {
           grid-area: filters;
-          padding: 4px;
+          padding: .5rem 1rem;
           width: 100%;
-          /* some kind of drop shadow, just on the bottom */
-          box-shadow: 0 4px 2px -2px #eee;
+          box-shadow: 0 8px 4px -4px #eee;
         }
         #comments {
+          padding: .5rem 1rem;
           grid-area: comments;
           overflow-y: scroll;
         }
@@ -120,32 +127,33 @@
       </div>
 
       <div id="comments">
-        <div v-for="comment in filteredComments" :key="comment.id">
-          <div class="grid" :class="{ edited: comment.edited }">
-            <!-- run adjustTextareaHeight on when the textarea is created -->
-            <textarea 
-               v-if="comment.editing" 
-               v-model="comment.comment"
-               ref="textareaRef"
-               @input="adjustTextareaHeight()"
-               @blur="e => {saveComment(comment); comment.editing = false; }"
-               ></textarea>
-            <div
-                v-else
-                @click="() => { 
-                        comment.editing = true;
-                        this.$nextTick(() => adjustTextareaHeight());
-                        }"
-                v-html="comment.comment.replace(/\n/g, '<br>')"
-                ></div>
+        <div v-for="comment in filteredComments" 
+             :key="comment.id"
+             class="grid2" 
+             :class="{ edited: comment.edited }">
+          <!-- run adjustTextareaHeight on when the textarea is created -->
+          <textarea 
+             v-if="comment.editing" 
+             v-model="comment.comment"
+             ref="textareaRef"
+             @input="adjustTextareaHeight()"
+             @blur="e => {saveComment(comment); comment.editing = false; }"
+             ></textarea>
+          <div
+              v-else
+              @click="() => { 
+                      comment.editing = true;
+                      this.$nextTick(() => adjustTextareaHeight());
+                      }"
+              v-html="comment.comment.replace(/\n/g, '<br>')"
+              ></div>
 
-            <div class="category-wrapper">
-              <input type="text" 
-                     v-model="comment.category"
-                     @blur="saveComment(comment)"
-                     list="categories"
-                     >
-            </div>
+          <div class="category-wrapper">
+            <input type="text" 
+                   v-model="comment.category"
+                   @blur="saveComment(comment)"
+                   list="categories"
+                   >
           </div>
         </div>
       </div>
