@@ -45,18 +45,7 @@
           display: block;
           height: 100%;
         }
-        .stats {
-            position: fixed;
-            right: 10px;
-            top: 80px;
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px;
-            font-size: 12px;
-            max-width: 200px;
-            height: 100vh;
-            overflow-y: scroll;
-        }
+
         .stats h3 {
             margin: 0 0 4px 0;
             font-size: 14px;
@@ -81,6 +70,34 @@
             margin-left: 4px;
             vertical-align: middle;
         }
+        #filters {
+          position: sticky;
+          top: 0;
+          background: white;
+          padding: 8px;
+          margin-bottom: 8px;
+          z-index: 100;
+        }
+        #comments {
+          height: calc(100vh - 80px);
+          overflow-y: scroll;
+          width: calc(100vw - 250px);
+        }
+        #stats {
+            position: fixed;
+            right: 10px;
+            top: 60px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 12px;
+            max-width: 200px;
+            height: 100vh;
+            overflow-y: scroll;
+        }
+        h3 {
+          margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -88,7 +105,7 @@
       <datalist id="categories">
         <option v-for="category in getCategories()" :value="category"></option>
       </datalist>
-      <div class="stats">
+      <div id="stats">
         <h3>Categories</h3>
           (sort by: <span 
            :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
@@ -111,7 +128,7 @@
 
 
       </div>
-          <div class="grid" style="position: sticky; top: 0; background: white; padding: 8px; border-bottom: 1px solid #ddd; margin-bottom: 8px; z-index: 100;">
+          <div id="filters" class="grid">
             <input 
                type="text" 
                v-model="filterText" 
@@ -127,7 +144,7 @@
                >
           </div>
 
-               <div>
+               <div id="comments">
                  <div v-for="comment in filteredComments" :key="comment.id">
                    <div class="grid" :class="{ edited: comment.edited }">
                      <!-- run adjustTextareaHeight on when the textarea is created -->
