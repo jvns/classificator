@@ -48,12 +48,6 @@ const app = Vue.createApp({
             }))
         },
 
-        debouncedSave(comment) {
-            comment.edited = true
-            clearTimeout(this.saveTimeout)
-            this.saveTimeout = setTimeout(() => this.saveComment(comment), 500)
-        },
-
         async saveComment(comment) {
             try {
                 await fetch(`/api/comments/${comment.id}`, {
