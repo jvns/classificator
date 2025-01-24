@@ -84,17 +84,12 @@
       outline: 2px solid #2563eb;
       border-radius: 4px;
     }
-    textarea.cell {
-      min-height: 45px;
-      border: none;
-      font-family: inherit;
-      font-size: inherit;
-      background: transparent;
-      resize: vertical;
-      overflow: visible;
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: system-ui;
     }
-
-    textarea.cell:focus {
+    pre:focus {
       outline: 2px solid #2563eb;
       border-radius: 4px;
       overflow: visible;
@@ -169,29 +164,24 @@
         <div v-for="comment in filteredComments" 
              :key="comment.id"
              class="row">
-          <!-- run adjustTextareaHeight on when the textarea is created -->
-          <textarea 
-             v-if="comment.editing" 
-             v-model="comment.comment"
-             ref="textareaRef"
-             class="cell comment"
-             @input="adjustTextareaHeight()"
-             @blur="e => {saveComment(comment); comment.editing = false; }"
-             ></textarea>
-          <div
+          <pre
+              contenteditable
               class="cell comment"
-              v-else
-              @click="() => { 
-                      comment.editing = true;
-                      this.$nextTick(() => adjustTextareaHeight());
-                      }"
-              v-html="comment.comment.replace(/\n/g, '<br>')"
-              ></div>
+              @blur="e => {
+                comment.comment = e.target.innerText;
+                saveComment(comment);
+                comment.editing = false;
+              }"
+              v-html="comment.comment"
 
-          <div class="cell" :style="{'background': getCategoryColor(comment.category)}">
+          ></pre>
+
+          <div class="cell"
+            :style="{'background': getCategoryColor(comment.category)}">
             <input type="text" 
                    v-model="comment.category"
                    @blur="saveComment(comment)"
+                   @focus="focusedCommentID = comment.id"
                    list="categories">
           </div>
         </div>

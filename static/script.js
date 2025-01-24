@@ -16,6 +16,7 @@ const app = Vue.createApp({
                 "#fefce8", // yellow
                 "#fff7ed", // orange
             ],
+            focusedCommentID: null,
         }
     },
 
@@ -28,7 +29,7 @@ const app = Vue.createApp({
                     comment.comment.toLowerCase().includes(this.filterText.toLowerCase())
                 const matchesCategory = !this.categoryFilter ||
                     comment.category.toLowerCase().includes(this.categoryFilter.toLowerCase())
-                return matchesText && matchesCategory
+                return (matchesText && matchesCategory) || this.focusedCommentID === comment.id
             })
         },
         categoryStats() {
@@ -62,6 +63,7 @@ const app = Vue.createApp({
         },
 
         async saveComment(comment) {
+            this.focusedCommentID = null;
             try {
                 await fetch(`/api/comments/${comment.id}`, {
                     method: 'PUT',
