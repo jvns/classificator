@@ -7,6 +7,15 @@ const app = Vue.createApp({
             filterText: "",
             categoryFilter: "",
             sortKey: 'category',
+            colours: [
+                "#fef2f2", // red
+                "#fdf4ff", // purple
+                "#f5f3ff", // violet
+                "#eff6ff", // blue
+                "#f0fdf4", // green
+                "#fefce8", // yellow
+                "#fff7ed", // orange
+            ],
         }
     },
 
@@ -35,7 +44,11 @@ const app = Vue.createApp({
                 return statsPairs.sort((a, b) => a.category.localeCompare(b.category))
             }
 
-        }
+        },
+        uniqueCategories() {
+            const categories = new Set(this.comments.map(c => c.category))
+            return [...categories].sort()
+        },
     },
 
     methods: {
@@ -61,9 +74,10 @@ const app = Vue.createApp({
             }
         },
 
-        getCategories() {
-            const categories = new Set(this.comments.map(c => c.category))
-            return [...categories].sort()
+        getCategoryColor(category) {
+            const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const length = this.colours.length;
+            return this.colours[hash % length];
         },
 
         adjustTextareaHeight() {
