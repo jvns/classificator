@@ -4,102 +4,119 @@
     <title>Comment Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        * {
-            box-sizing: border-box;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: minmax(200px, 1fr) 400px;
-            gap: 4px;
-            width: calc(100vw - 250px);
-        }
-        .grid > *, .grid2 > * {
-            min-height: 12px;
-            padding: 2px 4px;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            margin: 0;
-        }
-
-        .grid2 {
-            display: grid;
-            grid-template-columns: minmax(200px, 1fr) 400px;
-            gap: 4px;
-            margin-bottom: 8px;
-            width: 100%;
-        }
-        .edited {
-            background-color: #fafafa;
-        }
-        .category-wrapper {
-            position: relative;
-        }
-        .category-wrapper input {
-          display: block;
-          height: 100%;
-        }
-
-        .stats h3 {
-            margin: 0 0 4px 0;
-            font-size: 14px;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 12px;
-            font-family: inherit;
-            height: auto;
-            font-size: inherit;
-        }
-        input {
-            width: 100%;
-            box-sizing: border-box;
-            border: none;
-            font-family: inherit;
-            font-size: inherit;
-        }
-        button {
-            font-size: 12px;
-            padding: 0 4px;
-            margin-left: 4px;
-            vertical-align: middle;
-        }
-        #wrapper {
-          padding: 0;
-          display: grid;
-          grid-template-columns: 1fr 200px;
-          /* areas */
-          grid-template-areas: 
-            "filters filters"
-            "comments stats";
-          gap: 4px;
-          height: 100vh;
-        }
-        #filters {
-          grid-area: filters;
-          padding: .5rem 1rem;
-          width: 100%;
-          box-shadow: 0 8px 4px -4px #eee;
-        }
-        #comments {
-          padding: .5rem 1rem;
-          grid-area: comments;
-          overflow-y: scroll;
-        }
-        #stats {
-            grid-area: stats;
-            background: white;
-            border-left: 1px solid #ddd;
-            padding: 8px;
-            font-size: 12px;
-            overflow-y: scroll;
-        }
-        h3 {
-          margin: 0;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    #app { 
+      font-family: system-ui;
+      background: #f5f5f5;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 2rem;
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+    }
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 0;
+    }
+    .filters {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 1rem;
+    }
+    .filter {
+      padding: 0.75rem;
+      border: 2px solid #eee;
+      border-radius: 6px;
+      flex: 1;
+      font-size: 0.9rem;
+    }
+    .filter:focus {
+      border-color: #2563eb;
+      outline: none;
+    }
+    .grid {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: auto;
+      flex: 1;
+      min-height: 0;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      border-bottom: 1px solid #eee;
+    }
+    .row:last-child {
+      border-bottom: none;
+    }
+    .cell {
+      padding: 0.75rem 1rem;
+      border-right: 1px solid #eee;
+      min-height: 45px;
+    }
+    .cell:last-child {
+      border-right: none;
+      background: #f8fafc;
+    }
+    .cell input {
+      width: 100%;
+      border: none;
+      padding: 0.25rem;
+      font-size: 0.9rem;
+      background: transparent;
+    }
+    .cell input:focus {
+      outline: 2px solid #2563eb;
+      border-radius: 4px;
+    }
+    [contenteditable]:focus {
+      outline: 2px solid #2563eb;
+      border-radius: 4px;
+    }
+    .sidebar {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      overflow: auto;
+      max-height: calc(100vh - 4rem);
+    }
+    .stat {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .stat:last-child {
+      margin-bottom: 0;
+    }
+    .stat-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .total-stat {
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #eee;
+    }
+    .total-stat .stat-value {
+      font-size: 2rem;
+      color: #2563eb;
+    }
+  
     </style>
 </head>
 <body>
@@ -107,39 +124,32 @@
     <datalist id="categories">
       <option v-for="category in getCategories()" :value="category"></option>
     </datalist>
-    <div id="wrapper">
-      <div id="filters">
-        <div class="grid">
-          <input 
-             type="text" 
-             v-model="filterText" 
-             placeholder="Filter comments..."
-             style="width: 300px; padding: 4px; border: 1px solid #ddd;"
-             >
-             <input 
-             type="text" 
-             v-model="categoryFilter" 
-             placeholder="Filter categories..."
-             list="categories"
-             style="width: 300px; padding: 4px; border: 1px solid #ddd; margin-left: 8px;"
-             >
-        </div>
+    <div class="main">
+      <div class="filters">
+        <input type="text" 
+               v-model="filterText" 
+               placeholder="Filter comments...">
+        <input type="text" 
+               v-model="categoryFilter" 
+               placeholder="Filter categories..."
+               list="categories">
       </div>
 
-      <div id="comments">
+      <div class="grid">
         <div v-for="comment in filteredComments" 
              :key="comment.id"
-             class="grid2" 
-             :class="{ edited: comment.edited }">
+             class="row">
           <!-- run adjustTextareaHeight on when the textarea is created -->
           <textarea 
              v-if="comment.editing" 
              v-model="comment.comment"
              ref="textareaRef"
+             class="cell"
              @input="adjustTextareaHeight()"
              @blur="e => {saveComment(comment); comment.editing = false; }"
              ></textarea>
           <div
+              class="cell"
               v-else
               @click="() => { 
                       comment.editing = true;
@@ -148,36 +158,35 @@
               v-html="comment.comment.replace(/\n/g, '<br>')"
               ></div>
 
-          <div class="category-wrapper">
+          <div class="cell">
             <input type="text" 
                    v-model="comment.category"
                    @blur="saveComment(comment)"
-                   list="categories"
-                   >
+                   list="categories">
           </div>
         </div>
       </div>
+    </div>
 
-      <div id="stats">
-        <h3>Categories</h3>
-        (sort by: <span 
-           :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
-           style="cursor: pointer"
-           @click="sortKey='category'">category</span> |
-         <span @click="sortKey='count'"
-           :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
-           style="cursor: pointer">count</span>)
+    <div class="sidebar">
+      <h3>Categories</h3>
+      (sort by: <span 
+         :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
+         style="cursor: pointer"
+         @click="sortKey='category'">category</span> |
+       <span @click="sortKey='count'"
+         :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
+         style="cursor: pointer">count</span>)
 
-         <div 
-           v-for="stat in categoryStats" 
-           :key="stat.category"
-           @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
-           style="cursor: pointer"
-           :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
-           >
-           {{ stat.category }} ({{ stat.count }})
-         </div>
-      </div>
+       <div 
+         v-for="stat in categoryStats" 
+         :key="stat.category"
+         @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
+         style="cursor: pointer"
+         :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
+         >
+         {{ stat.category }} ({{ stat.count }})
+       </div>
     </div>
   </div>
     <script src="script.js"></script>
