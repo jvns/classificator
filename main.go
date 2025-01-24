@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -140,6 +144,95 @@ func (s *Server) splitComment(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func readJSONValues(jsonContents io.Reader) ([]string, error) {
+	var values []string
+	if err := json.NewDecoder(jsonContents).Decode(&values); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %v", err)
+	}
+	return values, nil
+}
+
+func readCSVValues(csvContents io.Reader) ([]string, error) {
+	r := csv.NewReader(csvContents)
+	records, err := r.ReadAll()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse CSV: %v", err)
+	}
+	if len(records) == 0 {
+		return nil, nil
+	}
+	return records[0], nil // Return first row
+}
+
+func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
+	datasetName := r.FormValue("dataset")
+	if datasetName == "" {
+		http.Error(w, "Dataset name required", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	res, err := s.db.Exec("INSERT INTO datasets (name) VALUES (?)", datasetName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	datasetID, err := res.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	isJSON := strings.HasSuffix(strings.ToLower(header.Filename), ".json")
+	isCSV := strings.HasSuffix(strings.ToLower(header.Filename), ".csv")
+
+	var comments []string
+
+	if isJSON {
+		comments, err = readJSONValues(bufio.NewReader(file))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	} else if isCSV {
+		comments, err = readCSVValues(bufio.NewReader(file))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	} else {
+		http.Error(w, "Unsupported file format", http.StatusBadRequest)
+		return
+	}
+
+	// Insert comments into the database
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, comment := range comments {
+		_, err = tx.Exec("INSERT INTO comments (dataset_id, comment, category) VALUES (?, ?)", datasetID, comment, "")
+		if err != nil {
+			tx.Rollback()
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "comments.db")
 	if err != nil {
@@ -153,6 +246,7 @@ func main() {
 	http.HandleFunc("/api/comments", server.getComments)
 	http.HandleFunc("/api/categories", server.getCategories)
 	http.HandleFunc("/api/comments/", server.updateComment)
+	http.HandleFunc("POST /api/dataset/", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
