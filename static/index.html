@@ -108,32 +108,41 @@
       overflow: auto;
       max-height: calc(100vh - 2rem);
     }
-    .stat {
-      margin-bottom: 1.5rem;
+    .header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .sort {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+    .sort strong {
+      color: #2563eb;
+    }
+    .categories {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .category {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      padding: 0.25rem 0;
+      cursor: pointer;
     }
-    .stat:last-child {
-      margin-bottom: 0;
-    }
-    .stat-label {
-      color: #64748b;
-      font-weight: 500;
-    }
-    .stat-value {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #0f172a;
-    }
-    .total-stat {
-      padding-bottom: 1rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid #eee;
-    }
-    .total-stat .stat-value {
-      font-size: 2rem;
+    .category:hover {
       color: #2563eb;
+    }
+    .category.selected {
+      font-weight: 600;
+      color: #2563eb;
+    }
+    .category.selected .count {
+      color: inherit;
+    }
+    .count {
+      color: #666;
     }
   
     </style>
@@ -191,22 +200,23 @@
 
     <div class="sidebar">
       <h3>Categories</h3>
-      (sort by: <span 
+
+      <div class="sort">(sort by: <span 
          :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
          style="cursor: pointer"
          @click="sortKey='category'">category</span> |
        <span @click="sortKey='count'"
          :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
          style="cursor: pointer">count</span>)
-
+      </div>
        <div 
          v-for="stat in categoryStats" 
          :key="stat.category"
+         :class="{'selected': categoryFilter === stat.category}"
          @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
-         style="cursor: pointer"
-         :style="{ fontWeight: categoryFilter === stat.category ? 'bold' : 'normal' }"
-         >
-         {{ stat.category }} ({{ stat.count }})
+         class="category">
+         <span>{{ stat.category }}</span>
+         <span class="count">({{ stat.count }})</span>
        </div>
     </div>
   </div>
