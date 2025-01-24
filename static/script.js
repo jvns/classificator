@@ -1,7 +1,7 @@
 const app = Vue.createApp({
     data() {
         // get dataset ID from query string
-        const datasetID = new URLSearchParams(window.location.search).get('datasetID');
+        const datasetID = new URLSearchParams(window.location.search).get('dataset_id');
         return {
             comments: [],
             saveTimeout: null,

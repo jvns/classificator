@@ -168,7 +168,7 @@ func readCSVValues(csvContents io.Reader) ([]string, error) {
 }
 
 func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
-	datasetName := r.FormValue("dataset")
+	datasetName := r.FormValue("name")
 	if datasetName == "" {
 		http.Error(w, "Dataset name required", http.StatusBadRequest)
 		return
@@ -222,7 +222,7 @@ func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for _, comment := range comments {
-		_, err = tx.Exec("INSERT INTO comments (dataset_id, comment, category) VALUES (?, ?)", datasetID, comment, "")
+		_, err = tx.Exec("INSERT INTO comments (dataset_id, comment, category) VALUES (?, ?, ?)", datasetID, comment, "")
 		if err != nil {
 			tx.Rollback()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -233,7 +233,8 @@ func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	// redirect to `/?dataset_id=datasetID`
+	http.Redirect(w, r, fmt.Sprintf("/?dataset_id=%d", datasetID), http.StatusFound)
 }
 
 func main() {
@@ -249,7 +250,7 @@ func main() {
 	http.HandleFunc("GET /api/comments/{dataset_id}", server.getComments)
 	http.HandleFunc("/api/categories", server.getCategories)
 	http.HandleFunc("PUT /api/comments/", server.updateComment)
-	http.HandleFunc("POST /api/dataset/", server.createDataset)
+	http.HandleFunc("POST /api/dataset", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
