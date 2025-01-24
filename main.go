@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -25,12 +26,19 @@ type Server struct {
 }
 
 func (s *Server) getComments(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	datasetID, err := strconv.Atoi(r.PathValue("dataset_id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	rows, err := s.db.Query("SELECT rowid, comment, category FROM comments  WHERE comment != '' ORDER BY lower(category) DESC, lower(comment) ASC")
+	rows, err := s.db.Query(`
+        SELECT rowid, comment, category
+        FROM comments
+        WHERE comment != ''
+        AND dataset_id = ?
+        ORDER BY lower(category) DESC,
+        lower(comment) ASC
+    `, datasetID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,11 +85,6 @@ func (s *Server) getCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) updateComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "PUT" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var c Comment
 	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -243,9 +246,9 @@ func main() {
 	server := &Server{db: db}
 
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	http.HandleFunc("/api/comments", server.getComments)
+	http.HandleFunc("GET /api/comments/{dataset_id}", server.getComments)
 	http.HandleFunc("/api/categories", server.getCategories)
-	http.HandleFunc("/api/comments/", server.updateComment)
+	http.HandleFunc("PUT /api/comments/", server.updateComment)
 	http.HandleFunc("POST /api/dataset/", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
 

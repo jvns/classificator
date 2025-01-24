@@ -1,5 +1,7 @@
 const app = Vue.createApp({
     data() {
+        // get dataset ID from query string
+        const datasetID = new URLSearchParams(window.location.search).get('datasetID');
         return {
             comments: [],
             saveTimeout: null,
@@ -16,6 +18,7 @@ const app = Vue.createApp({
                 "#fefce8", // yellow
                 "#fff7ed", // orange
             ],
+            datasetID: datasetID,
             focusedCommentID: null,
         }
     },
@@ -54,7 +57,7 @@ const app = Vue.createApp({
 
     methods: {
         async fetchComments() {
-            const response = await fetch('/api/comments')
+            const response = await fetch('/api/comments/' + this.datasetID)
             this.comments = (await response.json()).map(c => ({
                 ...c,
                 showSuggestions: false,
