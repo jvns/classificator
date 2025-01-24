@@ -61,6 +61,13 @@
       padding: 0.75rem 1rem;
       border-right: 1px solid #eee;
       min-height: 45px;
+      margin: 0;
+      width: 100%;
+    }
+    .cell.comment {
+      width: calc(100% - 4px);
+      margin: 2px 2px;
+      border-right: 0px;
     }
     .cell:last-child {
       border-right: none;
@@ -77,10 +84,22 @@
       outline: 2px solid #2563eb;
       border-radius: 4px;
     }
-    [contenteditable]:focus {
+    textarea.cell {
+      min-height: 45px;
+      border: none;
+      font-family: inherit;
+      font-size: inherit;
+      background: transparent;
+      resize: vertical;
+      overflow: visible;
+    }
+
+    textarea.cell:focus {
       outline: 2px solid #2563eb;
       border-radius: 4px;
+      overflow: visible;
     }
+
     .sidebar {
       background: white;
       border-radius: 8px;
@@ -144,12 +163,12 @@
              v-if="comment.editing" 
              v-model="comment.comment"
              ref="textareaRef"
-             class="cell"
+             class="cell comment"
              @input="adjustTextareaHeight()"
              @blur="e => {saveComment(comment); comment.editing = false; }"
              ></textarea>
           <div
-              class="cell"
+              class="cell comment"
               v-else
               @click="() => { 
                       comment.editing = true;
