@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Datasets</title>
-    <script src="/js/vue.global.min.js"></script>
     <style>
         .dataset-list { list-style: none; padding: 0; }
         .dataset-item { padding: 0.5em; margin: 0.5em 0; background: #f5f5f5; }
@@ -13,40 +12,30 @@
     </style>
 </head>
 <body>
-    <div id="app">
-        <h1>Datasets</h1>
-        <ul class="dataset-list">
-            <li v-for="dataset in datasets" :key="dataset.id" class="dataset-item">
-                <a :href="'/dataset/?id=' + dataset.id">{{ dataset.name }}</a>
-            </li>
-        </ul>
-    </div>
+    <h1>Datasets</h1>
+    <ul class="dataset-list" id="datasetList"></ul>
 
     <script>
-        Vue.createApp({
-            data() {
-                return {
-                    datasets: [],
-                    newDataset: {
-                        name: '',
-                        file: null
-                    }
-                }
-            },
-            methods: {
-                async fetchDatasets() {
-                    try {
-                        const response = await fetch('/api/datasets')
-                        this.datasets = await response.json()
-                    } catch (err) {
-                        console.error('Failed to fetch datasets:', err)
-                    }
-                },
-            },
-            mounted() {
-                this.fetchDatasets()
+        async function fetchDatasets() {
+            try {
+                const response = await fetch('/api/datasets')
+                const datasets = await response.json()
+                renderDatasets(datasets)
+            } catch (err) {
+                console.error('Failed to fetch datasets:', err)
             }
-        }).mount('#app')
+        }
+
+        function renderDatasets(datasets) {
+            const list = document.getElementById('datasetList')
+            list.innerHTML = datasets.map(dataset => `
+                <li class="dataset-item">
+                    <a href="/dataset/?id=${dataset.id}">${dataset.name}</a>
+                </li>
+            `).join('')
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchDatasets)
     </script>
 </body>
 </html>
