@@ -237,7 +237,7 @@ func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getDatasets(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.db.Query("SELECT id, name FROM datasets ORDER BY id DESC")
+	rows, err := s.db.Query("SELECT id, name FROM datasets WHERE NOT deleted ORDER BY id DESC")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -264,6 +264,22 @@ func (s *Server) getDatasets(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(datasets)
 }
 
+func (s *Server) deleteDataset(w http.ResponseWriter, r *http.Request) {
+	datasetID, err := strconv.Atoi(r.PathValue("dataset_id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = s.db.Exec("UPDATE datasets SET deleted = TRUE WHERE id = ?", datasetID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "comments.db")
 	if err != nil {
@@ -280,6 +296,7 @@ func main() {
 	http.HandleFunc("POST /api/dataset", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
 	http.HandleFunc("/api/datasets", server.getDatasets)
+	http.HandleFunc("DELETE /api/datasets/{dataset_id}", server.deleteDataset)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

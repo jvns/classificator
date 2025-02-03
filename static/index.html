@@ -21,6 +21,15 @@
         .button-wrapper {
           text-align: center;
         }
+        .delete-btn {
+          float: right;
+          background: blue;
+          color: white;
+          border: none;
+          padding: 5px 10px;
+          cursor: pointer;
+
+        }
     </style>
 </head>
 <body>
@@ -47,8 +56,25 @@
             list.innerHTML = datasets.map(dataset => `
                 <li class="dataset-item">
                     <a href="/dataset/?id=${dataset.id}">${dataset.name}</a>
+                    <button onclick="deleteDataset(${dataset.id})" 
+                            class="delete-btn">
+                        Archive
+                    </button>
                 </li>
             `).join('')
+        }
+
+        async function deleteDataset(id) {
+          if (!confirm('Are you sure you want to delete this dataset?')) return;
+
+          try {
+            await fetch(`/api/datasets/${id}`, {
+              method: 'DELETE'
+            });
+            fetchDatasets();
+          } catch (err) {
+            console.error('Failed to delete dataset:', err);
+          }
         }
 
         document.addEventListener('DOMContentLoaded', fetchDatasets)

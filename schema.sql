@@ -1,6 +1,7 @@
 CREATE TABLE datasets (
    id INTEGER PRIMARY KEY,
-   name TEXT NOT NULL UNIQUE
+   name TEXT NOT NULL UNIQUE,
+   deleted INTEGER DEFAULT 0
 ) STRICT;
 
 CREATE TABLE comments (
