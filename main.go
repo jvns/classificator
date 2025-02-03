@@ -233,8 +233,7 @@ func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// redirect to `/?dataset_id=datasetID`
-	http.Redirect(w, r, fmt.Sprintf("/?dataset_id=%d", datasetID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/?id=%d", datasetID), http.StatusFound)
 }
 
 func main() {
