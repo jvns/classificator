@@ -1,4 +1,4 @@
-module github.com/jvns/coding-tool
+module github.com/jvns/classificator
 
 go 1.23.2
 
