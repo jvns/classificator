@@ -3,33 +3,62 @@
 <head>
     <title>Datasets</title>
     <style>
-        .dataset-list { list-style: none; padding: 0; }
-        .dataset-item { padding: 0.5em; margin: 0.5em 0; background: #f5f5f5; }
-        body {
-          max-width: 600px;
-          margin: auto;
-        }
-        .button {
-          display: inline-block;
-          padding: 0.5em 1em;
-          margin: 1em 0;
-          background: #2563eb;
-          color: white;
-          text-decoration: none;
-          border-radius: 4px;
-        }
-        .button-wrapper {
-          text-align: center;
-        }
-        .delete-btn {
-          float: right;
-          background: blue;
-          color: white;
-          border: none;
-          padding: 5px 10px;
-          cursor: pointer;
+body {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
 
-        }
+.dataset-list {
+  list-style: none;
+  padding: 0;
+}
+
+.dataset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.dataset-item a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.dataset-item a:hover {
+  text-decoration: underline;
+}
+
+.delete-btn {
+  padding: 0.5rem 1rem;
+  background: purple;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: rebeccapurple;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.button:hover {
+  background: #1d4ed8;
+}
     </style>
 </head>
 <body>
