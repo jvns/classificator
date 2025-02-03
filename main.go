@@ -236,6 +236,34 @@ func (s *Server) createDataset(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/?id=%d", datasetID), http.StatusFound)
 }
 
+func (s *Server) getDatasets(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.db.Query("SELECT id, name FROM datasets ORDER BY id DESC")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var datasets []struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+
+	for rows.Next() {
+		var d struct {
+			ID   int    `json:"id"`
+			Name string `json:"name"`
+		}
+		if err := rows.Scan(&d.ID, &d.Name); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		datasets = append(datasets, d)
+	}
+
+	json.NewEncoder(w).Encode(datasets)
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "comments.db")
 	if err != nil {
@@ -251,6 +279,7 @@ func main() {
 	http.HandleFunc("PUT /api/comments/", server.updateComment)
 	http.HandleFunc("POST /api/dataset", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
+	http.HandleFunc("/api/datasets", server.getDatasets)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
