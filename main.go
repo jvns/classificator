@@ -298,5 +298,6 @@ func main() {
 	http.HandleFunc("/api/datasets", server.getDatasets)
 	http.HandleFunc("DELETE /api/datasets/{dataset_id}", server.deleteDataset)
 
+	fmt.Println("Server running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
