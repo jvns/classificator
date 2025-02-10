@@ -1,7 +1,7 @@
 # classificator
 
 a tool for taking text responses and classifying them by hand. I just made it
-for myself but open sourcing it anyway.
+for myself and it has a lot of problems (very messy CSS, lots of UI issues) but open sourcing it anyway.
 
 It stores everything in a SQLite database.
 
