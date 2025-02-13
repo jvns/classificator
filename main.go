@@ -280,6 +280,34 @@ func (s *Server) deleteDataset(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) exportComments(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.db.Query("SELECT comment, category FROM comments")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	// Set headers so the browser knows it's a CSV file
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=comments_export.csv")
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	// Write header row
+	writer.Write([]string{"comment", "category"})
+
+	// Write each record from the database
+	for rows.Next() {
+		var comment, category string
+		if err := rows.Scan(&comment, &category); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writer.Write([]string{comment, category})
+	}
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "comments.db")
 	if err != nil {
@@ -296,6 +324,7 @@ func main() {
 	http.HandleFunc("POST /api/dataset", server.createDataset)
 	http.HandleFunc("/api/split/", server.splitComment)
 	http.HandleFunc("/api/datasets", server.getDatasets)
+	http.HandleFunc("/api/export", server.exportComments)
 	http.HandleFunc("DELETE /api/datasets/{dataset_id}", server.deleteDataset)
 
 	fmt.Println("Server running on port 8080")

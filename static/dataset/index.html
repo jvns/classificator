@@ -12,23 +12,24 @@
     </datalist>
     <div class="main">
       <div class="filters">
-        <input type="text" 
+        <input type="text"
                class="filter"
-               v-model="filterText" 
+               v-model="filterText"
                placeholder="Filter comments...">
-        <input type="text" 
+        <input type="text"
                class="filter"
-               v-model="categoryFilter" 
+               v-model="categoryFilter"
                placeholder="Filter categories..."
                list="categories">
       </div>
 
       <div class="grid">
-        <div v-for="comment in filteredComments" 
+        <div v-for="comment in filteredComments"
              :key="comment.id"
              class="row">
           <pre
-              contenteditable
+              contenteditable="false"
+              tabindex="-1"
               class="cell comment"
               @blur="e => {
                 comment.comment = e.target.innerText;
@@ -41,7 +42,7 @@
 
           <div class="cell"
             :style="{'background': getCategoryColor(comment.category)}">
-            <input type="text" 
+            <input type="text"
                    v-model="comment.category"
                    @blur="saveComment(comment)"
                    @focus="focusedCommentID = comment.id"
@@ -52,9 +53,12 @@
     </div>
 
     <div class="sidebar">
+
+      <a href="/api/export" class="btn">Export Comments</a> <!-- export comments and annotations to csv -->
+
       <h3>Categories</h3>
 
-      <div class="sort">(sort by: <span 
+      <div class="sort">(sort by: <span
          :style="{ fontWeight: sortKey === 'category' ? 'bold' : 'normal' }"
          style="cursor: pointer"
          @click="sortKey='category'">category</span> |
@@ -62,8 +66,8 @@
          :style="{ fontWeight: sortKey === 'count' ? 'bold' : 'normal' }"
          style="cursor: pointer">count</span>)
       </div>
-       <div 
-         v-for="stat in categoryStats" 
+       <div
+         v-for="stat in categoryStats"
          :key="stat.category"
          :class="{'selected': categoryFilter === stat.category}"
          @click="categoryFilter = categoryFilter === stat.category ? '' : stat.category"
