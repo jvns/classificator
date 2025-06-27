@@ -84,13 +84,6 @@ const app = Vue.createApp({
             const length = this.colours.length;
             return this.colours[hash % length];
         },
-
-        adjustTextareaHeight() {
-            const textarea = this.$refs.textareaRef[0];
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-            textarea.focus();
-        },
     },
     async mounted() {
         await this.fetchComments()
